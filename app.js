@@ -38,10 +38,20 @@ app.post('/osc', (req, res) => {
 // 페이더 애니메이션 상태
 const faderAnimations = new Map();
 
+// 현재 페이더 값 저장
+const currentFaderValues = new Map();
+
 // 천천히 페이더 조절하는 함수
 function animateFaders(channels, targetValue, duration = 2000) {
     const startTime = Date.now();
-    const startValues = channels.map(() => 0); // 시작값은 0으로 설정
+    
+    // 각 채널의 현재 값을 가져오거나 0으로 초기화
+    const startValues = channels.map(channel => {
+        if (!currentFaderValues.has(channel)) {
+            currentFaderValues.set(channel, 0);
+        }
+        return currentFaderValues.get(channel);
+    });
     
     const animate = () => {
         const elapsed = Date.now() - startTime;
@@ -56,6 +66,9 @@ function animateFaders(channels, targetValue, duration = 2000) {
             const startValue = startValues[index];
             const currentValue = startValue + (targetValue - startValue) * easeProgress;
             
+            // 현재 값 저장
+            currentFaderValues.set(channel, currentValue);
+            
             // OSC 메시지 전송
             const oscAddress = `/ch/${channel.toString().padStart(2, '0')}/mix/fader`;
             oscClient.send(oscAddress, currentValue);
@@ -64,6 +77,10 @@ function animateFaders(channels, targetValue, duration = 2000) {
         if (progress < 1) {
             setTimeout(animate, 50); // 20fps로 애니메이션
         } else {
+            // 애니메이션 완료 시 최종 값 저장
+            channels.forEach(channel => {
+                currentFaderValues.set(channel, targetValue);
+            });
             console.log(`채널 ${channels.join(', ')} 페이더 애니메이션 완료: ${Math.round(targetValue * 100)}%`);
         }
     };
