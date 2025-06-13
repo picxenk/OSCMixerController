@@ -42,7 +42,7 @@ const faderAnimations = new Map();
 const currentFaderValues = new Map();
 
 // 천천히 페이더 조절하는 함수
-function animateFaders(channels, targetValue, duration = 2000) {
+function animateFaders(channels, targetValues, duration = 2000) {
     const startTime = Date.now();
     
     // 각 채널의 현재 값을 가져오거나 0으로 초기화
@@ -64,6 +64,7 @@ function animateFaders(channels, targetValue, duration = 2000) {
         
         channels.forEach((channel, index) => {
             const startValue = startValues[index];
+            const targetValue = targetValues[index];
             const currentValue = startValue + (targetValue - startValue) * easeProgress;
             
             // 현재 값 저장
@@ -78,10 +79,10 @@ function animateFaders(channels, targetValue, duration = 2000) {
             setTimeout(animate, 50); // 20fps로 애니메이션
         } else {
             // 애니메이션 완료 시 최종 값 저장
-            channels.forEach(channel => {
-                currentFaderValues.set(channel, targetValue);
+            channels.forEach((channel, index) => {
+                currentFaderValues.set(channel, targetValues[index]);
             });
-            console.log(`채널 ${channels.join(', ')} 페이더 애니메이션 완료: ${Math.round(targetValue * 100)}%`);
+            console.log(`채널 ${channels.join(', ')} 페이더 애니메이션 완료: ${targetValues.map(v => Math.round(v * 100)).join('%, ')}%`);
         }
     };
     
@@ -90,7 +91,7 @@ function animateFaders(channels, targetValue, duration = 2000) {
 
 // 버튼 액션 (채널 뮤트/언뮤트 + 페이더 조절)
 app.post('/button', (req, res) => {
-    const { action, channels, targetValue } = req.body;
+    const { action, channels, targetValues } = req.body;
     
     try {
         if (action === 'mute_master') {
@@ -102,10 +103,10 @@ app.post('/button', (req, res) => {
             oscClient.send('/lr/mix/on', 1);
             console.log('Master Unmuted');
             res.json({ success: true, action: action });
-        } else if (action === 'fade_channels' && channels && targetValue !== undefined) {
+        } else if (action === 'fade_channels' && channels && targetValues) {
             // 여러 채널 페이더 애니메이션
-            console.log(`채널 ${channels.join(', ')} 페이더를 ${Math.round(targetValue * 100)}%로 조절 시작`);
-            animateFaders(channels, targetValue, 2000); // 2초 동안 애니메이션
+            console.log(`채널 ${channels.join(', ')} 페이더를 ${targetValues.map(v => Math.round(v * 100)).join('%, ')}%로 조절 시작`);
+            animateFaders(channels, targetValues, 2000); // 2초 동안 애니메이션
             res.json({ success: true, action: action });
         } else {
             res.status(400).json({ success: false, error: 'Invalid action or parameters' });

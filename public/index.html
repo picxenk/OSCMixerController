@@ -317,32 +317,32 @@
             <div class="button-grid">
                 <div class="button-section">
                     <div class="control-label">Channels 2+3+5</div>
-                    <button class="mute-button fade-button" data-channels="2,3,5">UP</button>
+                    <button class="mute-button fade-button" data-channels="2,3,5" data-target-values="30,50,75">UP</button>
                 </div>
                 
                 <div class="button-section">
                     <div class="control-label">Channels 4+5</div>
-                    <button class="mute-button fade-button" data-channels="4,5">UP</button>
+                    <button class="mute-button fade-button" data-channels="4,5" data-target-values="50,75">UP</button>
                 </div>
                 
                 <div class="button-section">
                     <div class="control-label">Channels 6+7</div>
-                    <button class="mute-button fade-button" data-channels="6,7">UP</button>
+                    <button class="mute-button fade-button" data-channels="6,7" data-target-values="50,50">UP</button>
                 </div>
                 
                 <div class="button-section">
                     <div class="control-label">Channels 8+9</div>
-                    <button class="mute-button fade-button" data-channels="8,9">UP</button>
+                    <button class="mute-button fade-button" data-channels="8,9" data-target-values="50,50">UP</button>
                 </div>
                 
                 <div class="button-section">
                     <div class="control-label">Channels 10+11</div>
-                    <button class="mute-button fade-button" data-channels="10,11">UP</button>
+                    <button class="mute-button fade-button" data-channels="10,11" data-target-values="50,50">UP</button>
                 </div>
                 
                 <div class="button-section">
                     <div class="control-label">Channels 12+13</div>
-                    <button class="mute-button fade-button" data-channels="12,13">UP</button>
+                    <button class="mute-button fade-button" data-channels="12,13" data-target-values="50,50">UP</button>
                 </div>
             </div>
             
@@ -376,10 +376,11 @@
         // 페이더 버튼 이벤트 처리
         document.querySelectorAll('.fade-button').forEach(button => {
             const channels = button.dataset.channels.split(',').map(Number);
+            const targetValues = button.dataset.targetValues.split(',').map(value => parseInt(value) / 100);
             const state = {
                 isRunning: false,
                 isGoingUp: true,
-                targetValue: 0.75
+                targetValues: targetValues
             };
             faderStates.set(button, state);
             
@@ -394,7 +395,7 @@
                     button.classList.add('animating');
                     button.disabled = true;
                     
-                    const targetValue = state.isGoingUp ? state.targetValue : 0;
+                    const targetValues = state.isGoingUp ? state.targetValues : channels.map(() => 0);
                     const response = await fetch('/button', {
                         method: 'POST',
                         headers: {
@@ -403,15 +404,18 @@
                         body: JSON.stringify({
                             action: 'fade_channels',
                             channels: channels,
-                            targetValue: targetValue
+                            targetValues: targetValues
                         }),
                     });
                     
                     const result = await response.json();
                     
                     if (result.success) {
-                        const direction = state.isGoingUp ? 'rising to 75%' : 'falling to 0%';
-                        status.textContent = `Channels ${channels.join('+')} fader ${direction}...`;
+                        const direction = state.isGoingUp ? 'rising' : 'falling';
+                        const targetPercentages = state.isGoingUp ? 
+                            state.targetValues.map(v => Math.round(v * 100)) : 
+                            channels.map(() => 0);
+                        status.textContent = `Channels ${channels.join('+')} fader ${direction} to ${targetPercentages.join('%/')}%...`;
                         
                         setTimeout(() => {
                             state.isRunning = false;
@@ -422,13 +426,13 @@
                             button.textContent = state.isGoingUp ? 'UP' : 'DOWN';
                             
                             // Add or remove active class based on state
-                            if (!state.isGoingUp) {  // 페이더가 올라간 상태(75%)일 때 active
+                            if (!state.isGoingUp) {  // 페이더가 올라간 상태일 때 active
                                 button.classList.add('active');
                             } else {
                                 button.classList.remove('active');
                             }
                             
-                            const finalDirection = state.isGoingUp ? '0%' : '75%';
+                            const finalDirection = state.isGoingUp ? '0%' : targetPercentages.join('%/') + '%';
                             status.textContent = `Channels ${channels.join('+')} fader ${finalDirection} completed`;
                         }, 2000);
                     } else {
