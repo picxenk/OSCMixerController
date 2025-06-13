@@ -93,14 +93,14 @@ app.post('/button', (req, res) => {
     const { action, channels, targetValue } = req.body;
     
     try {
-        if (action === 'mute_ch1') {
-            // 채널 1 뮤트 토글
-            oscClient.send('/ch/01/mix/on', 0); // 0 = 뮤트, 1 = 언뮤트
-            console.log('CH 1 Muted');
+        if (action === 'mute_master') {
+            // 마스터 뮤트 토글
+            oscClient.send('/lr/mix/on', 0); // 0 = 뮤트, 1 = 언뮤트
+            console.log('Master Muted');
             res.json({ success: true, action: action });
-        } else if (action === 'unmute_ch1') {
-            oscClient.send('/ch/01/mix/on', 1);
-            console.log('CH 1 Unmuted');
+        } else if (action === 'unmute_master') {
+            oscClient.send('/lr/mix/on', 1);
+            console.log('Master Unmuted');
             res.json({ success: true, action: action });
         } else if (action === 'fade_channels' && channels && targetValue !== undefined) {
             // 여러 채널 페이더 애니메이션

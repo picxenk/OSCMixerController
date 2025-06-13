@@ -132,6 +132,43 @@
             position: relative;
         }
 
+        .master-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .master-mute-button {
+            width: 60px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .master-mute-button.muted {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        }
+
+        .master-mute-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .master-mute-button:active {
+            transform: scale(0.95);
+        }
+
         .volume-slider {
             -webkit-appearance: none;
             appearance: none;
@@ -233,6 +270,12 @@
                 height: 80px;
                 font-size: 0.9em;
             }
+
+            .master-mute-button {
+                width: 50px;
+                height: 35px;
+                font-size: 0.8em;
+            }
             
             .volume-slider {
                 width: 250px;
@@ -304,16 +347,14 @@
             </div>
             
             <div class="slider-section">
-                <div class="button-section">
-                    <div class="control-label">Channel 1 Mute</div>
-                    <button id="muteButton" class="mute-button unmuted">ON</button>
-                </div>
-                
                 <div class="control-label">Master Volume</div>
-                <div class="slider-container">
-                    <input type="range" id="volumeSlider" class="volume-slider" 
-                           min="0" max="1" step="0.01" value="0.75">
-                    <div class="volume-value" id="volumeValue">75%</div>
+                <div class="master-controls">
+                    <div class="slider-container">
+                        <input type="range" id="volumeSlider" class="volume-slider" 
+                               min="0" max="1" step="0.01" value="0.75">
+                        <div class="volume-value" id="volumeValue">75%</div>
+                    </div>
+                    <button id="muteButton" class="master-mute-button">🔊</button>
                 </div>
             </div>
         </div>
@@ -408,7 +449,7 @@
         // 뮤트 버튼 이벤트
         muteButton.addEventListener('click', async () => {
             try {
-                const action = isMuted ? 'unmute_ch1' : 'mute_ch1';
+                const action = isMuted ? 'unmute_master' : 'mute_master';
                 
                 const response = await fetch('/button', {
                     method: 'POST',
@@ -422,9 +463,9 @@
                 
                 if (result.success) {
                     isMuted = !isMuted;
-                    muteButton.textContent = isMuted ? 'OFF' : 'ON';
-                    muteButton.className = `mute-button ${isMuted ? 'muted' : 'unmuted'}`;
-                    status.textContent = `Channel 1 ${isMuted ? 'muted' : 'activated'}`;
+                    muteButton.textContent = isMuted ? '🔇' : '🔊';
+                    muteButton.className = `master-mute-button ${isMuted ? 'muted' : ''}`;
+                    status.textContent = `Master ${isMuted ? 'muted' : 'activated'}`;
                 } else {
                     status.textContent = 'Error: ' + result.error;
                 }
