@@ -1,0 +1,26 @@
+{
+    "name": "xr18-osc-controller",
+    "version": "1.0.0",
+    "description": "베링거 XR18 믹서용 간단한 OSC 컨트롤러",
+    "main": "app.js",
+    "scripts": {
+      "start": "node app.js",
+      "dev": "nodemon app.js"
+    },
+    "dependencies": {
+      "express": "^4.18.2",
+      "node-osc": "^8.0.1"
+    },
+    "devDependencies": {
+      "nodemon": "^3.0.1"
+    },
+    "keywords": [
+      "xr18",
+      "osc",
+      "mixer",
+      "behringer",
+      "controller"
+    ],
+    "author": "Your Name",
+    "license": "MIT"
+  }
