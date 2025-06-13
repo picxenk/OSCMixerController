@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -80,6 +80,22 @@
         .mute-button.muted {
             background: linear-gradient(135deg, #f44336, #d32f2f);
             color: white;
+        }
+
+        .mute-button.fade-button {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+        }
+
+        .mute-button.fade-button.animating {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
         .mute-button:hover {
@@ -176,8 +192,13 @@
         
         <div class="controls">
             <div class="button-section">
-                <div class="control-label">CH 1 Mute</div>
+                <div class="control-label">Channel 1 Mute</div>
                 <button id="muteButton" class="mute-button unmuted">ON</button>
+            </div>
+            
+            <div class="button-section">
+                <div class="control-label">Channel 2+3 Fader</div>
+                <button id="fadeButton" class="mute-button fade-button">UP</button>
             </div>
             
             <div class="slider-section">
@@ -195,11 +216,14 @@
 
     <script>
         const muteButton = document.getElementById('muteButton');
+        const fadeButton = document.getElementById('fadeButton');
         const volumeSlider = document.getElementById('volumeSlider');
         const volumeValue = document.getElementById('volumeValue');
         const status = document.getElementById('status');
         
         let isMuted = false;
+        let isGoingUp = true;
+        let isAnimating = false;
         
         // 뮤트 버튼 이벤트
         muteButton.addEventListener('click', async () => {
@@ -220,16 +244,68 @@
                     isMuted = !isMuted;
                     muteButton.textContent = isMuted ? 'OFF' : 'ON';
                     muteButton.className = `mute-button ${isMuted ? 'muted' : 'unmuted'}`;
-                    status.textContent = `CH 1 ${isMuted ? 'Muted' : 'Unmuted'}`;
+                    status.textContent = `Channel 1 ${isMuted ? 'muted' : 'activated'}`;
                 } else {
                     status.textContent = 'Error: ' + result.error;
                 }
             } catch (error) {
-                status.textContent = 'Connection Error: ' + error.message;
+                status.textContent = 'Connection error: ' + error.message;
             }
         });
         
-        // 볼륨 슬라이더 이벤트
+        // Fade button event
+        fadeButton.addEventListener('click', async () => {
+            if (isAnimating) {
+                status.textContent = 'Fade animation in progress...';
+                return;
+            }
+            
+            try {
+                isAnimating = true;
+                fadeButton.classList.add('animating');
+                fadeButton.disabled = true;
+                
+                const response = await fetch('/button', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ action: 'fade_ch23' }),
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const direction = isGoingUp ? 'rising to 75%' : 'falling to 0%';
+                    status.textContent = `Channel 2+3 fader ${direction}...`;
+                    
+                    // Animation completes after 2 seconds
+                    setTimeout(() => {
+                        isAnimating = false;
+                        fadeButton.classList.remove('animating');
+                        fadeButton.disabled = false;
+                        
+                        isGoingUp = !isGoingUp;
+                        fadeButton.textContent = isGoingUp ? 'UP' : 'DOWN';
+                        
+                        const finalDirection = isGoingUp ? '0%' : '75%';
+                        status.textContent = `Channel 2+3 fader ${finalDirection} completed`;
+                    }, 2000);
+                } else {
+                    isAnimating = false;
+                    fadeButton.classList.remove('animating');
+                    fadeButton.disabled = false;
+                    status.textContent = 'Error: ' + result.error;
+                }
+            } catch (error) {
+                isAnimating = false;
+                fadeButton.classList.remove('animating');
+                fadeButton.disabled = false;
+                status.textContent = 'Connection error: ' + error.message;
+            }
+        });
+        
+        // Volume slider event
         volumeSlider.addEventListener('input', async (e) => {
             const value = parseFloat(e.target.value);
             const percentage = Math.round(value * 100);
@@ -242,7 +318,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        address: '/main/st/mix/fader',  // XR18 마스터 볼륨
+                        address: '/main/lr/mix/fader',  // XR18 main LR master volume
                         value: value
                     }),
                 });
@@ -250,16 +326,16 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    status.textContent = `Master Volume: ${percentage}%`;
+                    status.textContent = `Master volume: ${percentage}%`;
                 } else {
                     status.textContent = 'Error: ' + result.error;
                 }
             } catch (error) {
-                status.textContent = 'Connection Error: ' + error.message;
+                status.textContent = 'Connection error: ' + error.message;
             }
         });
         
-        // 초기 볼륨 표시
+        // Initial volume display
         const initialPercentage = Math.round(volumeSlider.value * 100);
         volumeValue.textContent = initialPercentage + '%';
     </script>
