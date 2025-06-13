@@ -83,8 +83,12 @@
         }
 
         .fade-button {
-            background: linear-gradient(135deg, #ff9800, #f57c00);
+            background: linear-gradient(135deg, #9e9e9e, #757575);
             color: white;
+        }
+
+        .fade-button.active {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
         }
 
         .fade-button.animating {
@@ -375,6 +379,13 @@
                             
                             state.isGoingUp = !state.isGoingUp;
                             button.textContent = state.isGoingUp ? 'UP' : 'DOWN';
+                            
+                            // Add or remove active class based on state
+                            if (!state.isGoingUp) {  // 페이더가 올라간 상태(75%)일 때 active
+                                button.classList.add('active');
+                            } else {
+                                button.classList.remove('active');
+                            }
                             
                             const finalDirection = state.isGoingUp ? '0%' : '75%';
                             status.textContent = `Channels ${channels.join('+')} fader ${finalDirection} completed`;
