@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XR18 OSC 컨트롤러</title>
+    <title>XR18 OSC Controller</title>
     <style>
         * {
             margin: 0;
@@ -172,16 +172,16 @@
 </head>
 <body>
     <div class="container">
-        <h1>XR18 OSC 컨트롤러</h1>
+        <h1>XR18 OSC Controller</h1>
         
         <div class="controls">
             <div class="button-section">
-                <div class="control-label">채널 1 뮤트</div>
+                <div class="control-label">CH 1 Mute</div>
                 <button id="muteButton" class="mute-button unmuted">ON</button>
             </div>
             
             <div class="slider-section">
-                <div class="control-label">마스터 볼륨</div>
+                <div class="control-label">Master Volume</div>
                 <div class="slider-container">
                     <input type="range" id="volumeSlider" class="volume-slider" 
                            min="0" max="1" step="0.01" value="0.75">
@@ -220,12 +220,12 @@
                     isMuted = !isMuted;
                     muteButton.textContent = isMuted ? 'OFF' : 'ON';
                     muteButton.className = `mute-button ${isMuted ? 'muted' : 'unmuted'}`;
-                    status.textContent = `채널 1 ${isMuted ? '뮤트됨' : '활성화됨'}`;
+                    status.textContent = `CH 1 ${isMuted ? 'Muted' : 'Unmuted'}`;
                 } else {
-                    status.textContent = '오류: ' + result.error;
+                    status.textContent = 'Error: ' + result.error;
                 }
             } catch (error) {
-                status.textContent = '연결 오류: ' + error.message;
+                status.textContent = 'Connection Error: ' + error.message;
             }
         });
         
@@ -250,12 +250,12 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    status.textContent = `마스터 볼륨: ${percentage}%`;
+                    status.textContent = `Master Volume: ${percentage}%`;
                 } else {
-                    status.textContent = '오류: ' + result.error;
+                    status.textContent = 'Error: ' + result.error;
                 }
             } catch (error) {
-                status.textContent = '연결 오류: ' + error.message;
+                status.textContent = 'Connection Error: ' + error.message;
             }
         });
         
