@@ -83,12 +83,27 @@
         }
 
         .fade-button {
-            background: linear-gradient(135deg, #ff9800, #f57c00);
+            background-color: #4a4a4a;
             color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: center;
+        }
+
+        .fade-button.active {
+            background-color: #4CAF50;
+        }
+
+        .fade-button:hover {
+            background-color: #666;
         }
 
         .fade-button.animating {
-            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
             animation: pulse 1s infinite;
         }
 
@@ -269,8 +284,8 @@
         <div class="controls">
             <div class="button-grid">
                 <div class="button-section">
-                    <div class="control-label">Channels 2+3</div>
-                    <button class="mute-button fade-button" data-channels="2,3">UP</button>
+                    <div class="control-label">Channels 2+3+5</div>
+                    <button class="mute-button fade-button" data-channels="2,3,5">UP</button>
                 </div>
                 
                 <div class="button-section">
@@ -328,68 +343,49 @@
         // 페이더 애니메이션 상태 관리
         const faderStates = new Map();
         
-        // 페이더 버튼 이벤트 처리
+        // 페이더 버튼 클릭 이벤트
         document.querySelectorAll('.fade-button').forEach(button => {
-            const channels = button.dataset.channels.split(',').map(Number);
-            const state = {
-                isRunning: false,
-                isGoingUp: true,
-                targetValue: 0.75
-            };
-            faderStates.set(button, state);
-            
-            button.addEventListener('click', async () => {
-                if (state.isRunning) {
-                    status.textContent = '애니메이션이 이미 실행 중입니다.';
-                    return;
-                }
+            button.addEventListener('click', async function() {
+                const channels = this.dataset.channels.split(',').map(Number);
+                const isUp = this.textContent === 'UP';
                 
+                // 애니메이션 시작
+                this.classList.add('animating');
+                this.disabled = true;
+                
+                // 현재 버튼 상태 토글
+                this.textContent = isUp ? 'DOWN' : 'UP';
+                this.classList.toggle('active', !isUp);
+                
+                // 페이더 애니메이션 요청
                 try {
-                    state.isRunning = true;
-                    button.classList.add('animating');
-                    button.disabled = true;
-                    
-                    const targetValue = state.isGoingUp ? state.targetValue : 0;
                     const response = await fetch('/button', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             action: 'fade_channels',
                             channels: channels,
-                            targetValue: targetValue
-                        }),
+                            targetValue: isUp ? 0 : 1
+                        })
                     });
                     
-                    const result = await response.json();
-                    
-                    if (result.success) {
-                        const direction = state.isGoingUp ? 'rising to 75%' : 'falling to 0%';
-                        status.textContent = `Channels ${channels.join('+')} fader ${direction}...`;
-                        
-                        setTimeout(() => {
-                            state.isRunning = false;
-                            button.classList.remove('animating');
-                            button.disabled = false;
-                            
-                            state.isGoingUp = !state.isGoingUp;
-                            button.textContent = state.isGoingUp ? 'UP' : 'DOWN';
-                            
-                            const finalDirection = state.isGoingUp ? '0%' : '75%';
-                            status.textContent = `Channels ${channels.join('+')} fader ${finalDirection} completed`;
-                        }, 2000);
-                    } else {
-                        state.isRunning = false;
-                        button.classList.remove('animating');
-                        button.disabled = false;
-                        status.textContent = 'Error: ' + result.error;
+                    if (!response.ok) {
+                        throw new Error('페이더 조절 실패');
                     }
+
+                    // 애니메이션 완료 후 상태 정리
+                    setTimeout(() => {
+                        this.classList.remove('animating');
+                        this.disabled = false;
+                    }, 2000); // 2초 후 애니메이션 제거
+                    
                 } catch (error) {
-                    state.isRunning = false;
-                    button.classList.remove('animating');
-                    button.disabled = false;
-                    status.textContent = 'Error: ' + error.message;
+                    console.error('페이더 조절 오류:', error);
+                    // 오류 발생 시 버튼 상태 복구
+                    this.textContent = isUp ? 'UP' : 'DOWN';
+                    this.classList.toggle('active', isUp);
+                    this.classList.remove('animating');
+                    this.disabled = false;
                 }
             });
         });
