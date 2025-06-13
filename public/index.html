@@ -63,6 +63,7 @@
             margin-left: 40px;
             padding-left: 40px;
             border-left: 2px solid rgba(255, 255, 255, 0.2);
+            width: 100px;
         }
 
         .control-label {
@@ -124,48 +125,77 @@
             align-items: center;
             gap: 10px;
             height: 300px;
+            width: 100%;
+            position: relative;
         }
 
         .volume-slider {
             -webkit-appearance: none;
+            appearance: none;
             width: 8px;
             height: 300px;
             border-radius: 5px;
             background: rgba(255, 255, 255, 0.3);
             outline: none;
             cursor: pointer;
-            transform: none;
-            writing-mode: bt-lr; /* IE */
-            -webkit-appearance: slider-vertical; /* WebKit */
+            writing-mode: bt-lr;
+            -webkit-appearance: slider-vertical;
+            position: relative;
+            z-index: 1;
         }
 
+        /* Webkit (Chrome, Safari) 스타일 */
         .volume-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 25px;
-            height: 25px;
+            width: 60px !important;
+            height: 60px !important;
             border-radius: 50%;
             background: linear-gradient(135deg, #ff6b6b, #ee5a52);
             cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            margin-top: -26px;
+            margin-left: -26px;
+            position: relative;
+            z-index: 2;
         }
 
+        /* Firefox 스타일 */
         .volume-slider::-moz-range-thumb {
-            width: 25px;
-            height: 25px;
+            width: 60px !important;
+            height: 60px !important;
             border-radius: 50%;
             background: linear-gradient(135deg, #ff6b6b, #ee5a52);
             cursor: pointer;
-            border: none;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Firefox 트랙 스타일 */
+        .volume-slider::-moz-range-track {
+            width: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+        }
+
+        /* Edge 스타일 */
+        .volume-slider::-ms-thumb {
+            width: 60px !important;
+            height: 60px !important;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            cursor: pointer;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
         }
 
         .volume-value {
-            font-size: 1.5em;
+            font-size: 1.2em;
             font-weight: bold;
             color: #ffeb3b;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-            min-width: 80px;
+            min-width: 60px;
         }
 
         .status {
@@ -190,6 +220,7 @@
             }
             
             .slider-section {
+                width: 100%;
                 margin-left: 0;
                 padding-left: 0;
                 border-left: none;
@@ -203,6 +234,23 @@
                 height: 8px;
                 writing-mode: horizontal-tb;
                 -webkit-appearance: slider-horizontal;
+            }
+            
+            .volume-slider::-webkit-slider-thumb {
+                width: 50px !important;
+                height: 50px !important;
+                margin-top: -21px;
+                margin-left: 0;
+            }
+            
+            .volume-slider::-moz-range-thumb {
+                width: 50px !important;
+                height: 50px !important;
+            }
+            
+            .volume-slider::-ms-thumb {
+                width: 50px !important;
+                height: 50px !important;
             }
             
             .slider-container {
