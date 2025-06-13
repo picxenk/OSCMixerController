@@ -26,11 +26,11 @@ app.post('/osc', (req, res) => {
     const { address, value } = req.body;
     
     try {
-        console.log(`OSC 전송: ${address} = ${value}`);
+        console.log(`OSC send: ${address} = ${value}`);
         oscClient.send(address, parseFloat(value));
-        res.json({ success: true, message: `전송됨: ${address} = ${value}` });
+        res.json({ success: true, message: `send: ${address} = ${value}` });
     } catch (error) {
-        console.error('OSC 전송 오류:', error);
+        console.error('OSC send error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -43,20 +43,20 @@ app.post('/button', (req, res) => {
         if (action === 'mute_ch1') {
             // 채널 1 뮤트 토글
             oscClient.send('/ch/01/mix/on', 0); // 0 = 뮤트, 1 = 언뮤트
-            console.log('채널 1 뮤트');
+            console.log('CH 1 Muted');
         } else if (action === 'unmute_ch1') {
             oscClient.send('/ch/01/mix/on', 1);
-            console.log('채널 1 언뮤트');
+            console.log('CH 1 Unmuted');
         }
         
         res.json({ success: true, action: action });
     } catch (error) {
-        console.error('버튼 액션 오류:', error);
+        console.error('Button action error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
 app.listen(port, () => {
-    console.log(`XR18 OSC 컨트롤러가 http://localhost:${port} 에서 실행중`);
-    console.log(`XR18 연결 대상: ${XR18_IP}:${XR18_PORT}`);
+    console.log(`XR18 OSC Controller is running on http://localhost:${port}`);
+    console.log(`XR18 target: ${XR18_IP}:${XR18_PORT}`);
 });
