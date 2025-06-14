@@ -253,6 +253,12 @@
             justify-content: center;
         }
 
+        .status.error {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -552,6 +558,38 @@
 
         // 페이지 로드 시 채널 설정 로드
         loadChannelConfig();
+
+        // Mixer 연결 상태 확인 함수
+        async function checkMixerConnection() {
+            try {
+                const response = await fetch('/button', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ action: 'check_connection' })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Mixer not responding');
+                }
+                
+                const result = await response.json();
+                if (result.success) {
+                    status.textContent = 'Ready';
+                    status.classList.remove('error');
+                } else {
+                    throw new Error('Mixer not responding');
+                }
+            } catch (error) {
+                status.textContent = 'Check WiFi to connect XR18 Mixer';
+                status.classList.add('error');
+            }
+        }
+
+        // 주기적으로 Mixer 연결 상태 확인
+        setInterval(checkMixerConnection, 5000);
+        checkMixerConnection(); // 초기 확인
 
         // 뮤트 버튼 이벤트
         muteButton.addEventListener('click', async () => {

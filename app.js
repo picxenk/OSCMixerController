@@ -136,6 +136,16 @@ app.post('/button', (req, res) => {
             console.log(`채널 ${channels.join(', ')} 페이더를 ${targetValues.map(v => Math.round(v * 100)).join('%, ')}%로 조절 시작`);
             animateFaders(channels, targetValues, 2000); // 2초 동안 애니메이션
             res.json({ success: true, action: action });
+        } else if (action === 'check_connection') {
+            // OSC 클라이언트 연결 상태 확인
+            try {
+                // 마스터 상태를 읽어서 연결 테스트
+                oscClient.send('/lr/mix/on');
+                res.json({ success: true, action: action });
+            } catch (error) {
+                console.error('Mixer 연결 확인 오류:', error);
+                res.status(500).json({ success: false, error: 'Mixer not responding' });
+            }
         } else {
             res.status(400).json({ success: false, error: 'Invalid action or parameters' });
         }
