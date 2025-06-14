@@ -1,0 +1,14 @@
+[Unit]
+Description=Matter Matters OSC Mixer Controller
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/node /home/protoroom/OSCMixerController/app.js
+WorkingDirectory=/home/protoroom/OSCMixerController
+Restart=always
+User=protoroom
+Environment=NODE_ENV=production
+Environment=PORT=3000
+
+[Install]
+WantedBy=multi-user.target
