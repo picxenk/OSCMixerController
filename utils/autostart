@@ -1,0 +1,4 @@
+@xset s off
+@xset -dpms
+@xset s noblank
+@chromium-browser --noerrdialogs --kiosk http://localhost:3000 --incognito --disable-translate --disable-infobars --disable-session-crashed-bubble
