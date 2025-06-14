@@ -312,9 +312,101 @@
                 font-size: 2em;
             }
         }
+
+        /* Add new styles for shutdown functionality */
+        .shutdown-area {
+            position: fixed;
+            top: 0;
+            width: 100px;
+            height: 100px;
+            z-index: 1000;
+        }
+
+        .shutdown-area.left {
+            left: 0;
+        }
+
+        .shutdown-area.right {
+            right: 0;
+        }
+
+        .shutdown-dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 2000;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .shutdown-dialog h2 {
+            margin-bottom: 20px;
+            color: #ff6b6b;
+        }
+
+        .shutdown-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .shutdown-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .shutdown-confirm {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .shutdown-cancel {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .shutdown-button:hover {
+            transform: scale(1.05);
+        }
+
+        .shutdown-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1999;
+        }
     </style>
 </head>
 <body>
+    <!-- Add shutdown areas -->
+    <div class="shutdown-area left"></div>
+    <div class="shutdown-area right"></div>
+
+    <!-- Add shutdown dialog -->
+    <div class="shutdown-overlay" id="shutdownOverlay"></div>
+    <div class="shutdown-dialog" id="shutdownDialog">
+        <h2>시스템 종료</h2>
+        <p>라즈베리파이를 안전하게 종료하시겠습니까?</p>
+        <div class="shutdown-buttons">
+            <button class="shutdown-button shutdown-confirm" id="shutdownConfirm">종료</button>
+            <button class="shutdown-button shutdown-cancel" id="shutdownCancel">취소</button>
+        </div>
+    </div>
+
     <div class="container">
         <div class="controls">
             <div class="button-grid">
@@ -509,6 +601,82 @@
             } catch (error) {
                 status.textContent = 'Error: ' + error.message;
             }
+        });
+
+        // Add shutdown functionality
+        let leftAreaClicked = false;
+        let rightAreaClicked = false;
+        let clickTimeout = null;
+
+        const leftArea = document.querySelector('.shutdown-area.left');
+        const rightArea = document.querySelector('.shutdown-area.right');
+        const shutdownDialog = document.getElementById('shutdownDialog');
+        const shutdownOverlay = document.getElementById('shutdownOverlay');
+        const shutdownConfirm = document.getElementById('shutdownConfirm');
+        const shutdownCancel = document.getElementById('shutdownCancel');
+
+        function resetClickState() {
+            leftAreaClicked = false;
+            rightAreaClicked = false;
+            if (clickTimeout) {
+                clearTimeout(clickTimeout);
+                clickTimeout = null;
+            }
+        }
+
+        function showShutdownDialog() {
+            shutdownDialog.style.display = 'block';
+            shutdownOverlay.style.display = 'block';
+        }
+
+        function hideShutdownDialog() {
+            shutdownDialog.style.display = 'none';
+            shutdownOverlay.style.display = 'none';
+        }
+
+        leftArea.addEventListener('click', () => {
+            leftAreaClicked = true;
+            if (rightAreaClicked) {
+                showShutdownDialog();
+                resetClickState();
+            } else {
+                clickTimeout = setTimeout(resetClickState, 1000);
+            }
+        });
+
+        rightArea.addEventListener('click', () => {
+            rightAreaClicked = true;
+            if (leftAreaClicked) {
+                showShutdownDialog();
+                resetClickState();
+            } else {
+                clickTimeout = setTimeout(resetClickState, 1000);
+            }
+        });
+
+        shutdownConfirm.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/shutdown', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    status.textContent = '시스템이 종료됩니다...';
+                    hideShutdownDialog();
+                } else {
+                    status.textContent = 'Error: ' + result.error;
+                }
+            } catch (error) {
+                status.textContent = 'Error: ' + error.message;
+            }
+        });
+
+        shutdownCancel.addEventListener('click', () => {
+            hideShutdownDialog();
         });
     </script>
 </body>

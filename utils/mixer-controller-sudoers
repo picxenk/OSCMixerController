@@ -1,0 +1,2 @@
+# Allow the protoroom user to execute shutdown command without password
+protoroom ALL=(ALL) NOPASSWD: /sbin/shutdown 

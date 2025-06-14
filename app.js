@@ -1,6 +1,7 @@
 const express = require('express');
 const { Client } = require('node-osc');
 const path = require('path');
+const { exec } = require('child_process');
 
 const app = express();
 const port = 3000;
@@ -113,6 +114,32 @@ app.post('/button', (req, res) => {
         }
     } catch (error) {
         console.error('버튼 액션 오류:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// 셧다운 API
+app.post('/shutdown', (req, res) => {
+    try {
+        console.log('시스템 종료 요청 받음');
+        res.json({ success: true, message: '시스템이 종료됩니다.' });
+        
+        // 3초 후 시스템 종료 실행
+        setTimeout(() => {
+            exec('sudo shutdown -h now', (error, stdout, stderr) => {
+                if (error) {
+                    console.error('셧다운 오류:', error);
+                    return;
+                }
+                if (stderr) {
+                    console.error('셧다운 stderr:', stderr);
+                    return;
+                }
+                console.log('셧다운 stdout:', stdout);
+            });
+        }, 3000);
+    } catch (error) {
+        console.error('셧다운 처리 오류:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
