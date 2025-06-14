@@ -317,8 +317,8 @@
         .shutdown-area {
             position: fixed;
             top: 0;
-            width: 100px;
-            height: 100px;
+            width: 200px;
+            height: 200px;
             z-index: 1000;
         }
 
@@ -634,24 +634,24 @@
             shutdownOverlay.style.display = 'none';
         }
 
-        leftArea.addEventListener('click', () => {
-            leftAreaClicked = true;
-            if (rightAreaClicked) {
+        // 동시 클릭 감지를 위한 변수
+        let lastClickTime = 0;
+        const CLICK_THRESHOLD = 100; // 100ms 이내 클릭을 동시 클릭으로 간주
+
+        leftArea.addEventListener('mousedown', () => {
+            const currentTime = Date.now();
+            if (currentTime - lastClickTime < CLICK_THRESHOLD) {
                 showShutdownDialog();
-                resetClickState();
-            } else {
-                clickTimeout = setTimeout(resetClickState, 1000);
             }
+            lastClickTime = currentTime;
         });
 
-        rightArea.addEventListener('click', () => {
-            rightAreaClicked = true;
-            if (leftAreaClicked) {
+        rightArea.addEventListener('mousedown', () => {
+            const currentTime = Date.now();
+            if (currentTime - lastClickTime < CLICK_THRESHOLD) {
                 showShutdownDialog();
-                resetClickState();
-            } else {
-                clickTimeout = setTimeout(resetClickState, 1000);
             }
+            lastClickTime = currentTime;
         });
 
         shutdownConfirm.addEventListener('click', async () => {
@@ -665,7 +665,7 @@
                 
                 const result = await response.json();
                 if (result.success) {
-                    status.textContent = '시스템이 종료됩니다...';
+                    status.textContent = 'System is shutting down...';
                     hideShutdownDialog();
                 } else {
                     status.textContent = 'Error: ' + result.error;
