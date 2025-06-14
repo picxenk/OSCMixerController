@@ -409,36 +409,8 @@
 
     <div class="container">
         <div class="controls">
-            <div class="button-grid">
-                <div class="button-section">
-                    <div class="control-label">Ch 2+3+5 (30/50/75)</div>
-                    <button class="mute-button fade-button" data-channels="2,3,5" data-target-values="30,50,75">UP</button>
-                </div>
-                
-                <div class="button-section">
-                    <div class="control-label">Ch 4+5 (50/75)</div>
-                    <button class="mute-button fade-button" data-channels="4,5" data-target-values="50,75">UP</button>
-                </div>
-                
-                <div class="button-section">
-                    <div class="control-label">Ch 6+7 (50/50)</div>
-                    <button class="mute-button fade-button" data-channels="6,7" data-target-values="50,50">UP</button>
-                </div>
-                
-                <div class="button-section">
-                    <div class="control-label">Ch 8+9 (30/50)</div>
-                    <button class="mute-button fade-button" data-channels="8,9" data-target-values="30,50">UP</button>
-                </div>
-                
-                <div class="button-section">
-                    <div class="control-label">Ch 10+11 (50/50)</div>
-                    <button class="mute-button fade-button" data-channels="10,11" data-target-values="50,50">UP</button>
-                </div>
-                
-                <div class="button-section">
-                    <div class="control-label">Ch 12+13 (50/50)</div>
-                    <button class="mute-button fade-button" data-channels="12,13" data-target-values="50,50">UP</button>
-                </div>
+            <div class="button-grid" id="buttonGrid">
+                <!-- 버튼들이 동적으로 생성됩니다 -->
             </div>
             
             <div class="slider-section">
@@ -461,20 +433,55 @@
         const volumeSlider = document.getElementById('volumeSlider');
         const volumeValue = document.getElementById('volumeValue');
         const status = document.getElementById('status');
+        const buttonGrid = document.getElementById('buttonGrid');
         
         let isMuted = false;
         
         // 페이더 애니메이션 상태 관리
         const faderStates = new Map();
-        
-        // 페이더 버튼 이벤트 처리
-        document.querySelectorAll('.fade-button').forEach(button => {
-            const channels = button.dataset.channels.split(',').map(Number);
-            const targetValues = button.dataset.targetValues.split(',').map(value => parseInt(value) / 100);
+
+        // 채널 설정 로드 및 버튼 생성
+        async function loadChannelConfig() {
+            try {
+                const response = await fetch('/api/channel-config');
+                const config = await response.json();
+                
+                // 기존 버튼 제거
+                buttonGrid.innerHTML = '';
+                
+                // 새로운 버튼 생성
+                config.channelGroups.forEach(group => {
+                    const buttonSection = document.createElement('div');
+                    buttonSection.className = 'button-section';
+                    
+                    const label = document.createElement('div');
+                    label.className = 'control-label';
+                    label.textContent = `${group.name} (${group.targetValues.join('/')})`;
+                    
+                    const button = document.createElement('button');
+                    button.className = 'mute-button fade-button';
+                    button.textContent = 'UP';
+                    button.dataset.channels = group.channels.join(',');
+                    button.dataset.targetValues = group.targetValues.join(',');
+                    
+                    buttonSection.appendChild(label);
+                    buttonSection.appendChild(button);
+                    buttonGrid.appendChild(buttonSection);
+                    
+                    // 버튼 이벤트 리스너 설정
+                    setupFadeButton(button, group.channels, group.targetValues);
+                });
+            } catch (error) {
+                status.textContent = 'Error loading channel configuration: ' + error.message;
+            }
+        }
+
+        // 페이더 버튼 이벤트 설정
+        function setupFadeButton(button, channels, targetValues) {
             const state = {
                 isRunning: false,
                 isGoingUp: true,
-                targetValues: targetValues
+                targetValues: targetValues.map(value => parseInt(value) / 100)
             };
             faderStates.set(button, state);
             
@@ -519,8 +526,7 @@
                             state.isGoingUp = !state.isGoingUp;
                             button.textContent = state.isGoingUp ? 'UP' : 'DOWN';
                             
-                            // Add or remove active class based on state
-                            if (!state.isGoingUp) {  // 페이더가 올라간 상태일 때 active
+                            if (!state.isGoingUp) {
                                 button.classList.add('active');
                             } else {
                                 button.classList.remove('active');
@@ -542,7 +548,10 @@
                     status.textContent = 'Error: ' + error.message;
                 }
             });
-        });
+        }
+
+        // 페이지 로드 시 채널 설정 로드
+        loadChannelConfig();
 
         // 뮤트 버튼 이벤트
         muteButton.addEventListener('click', async () => {

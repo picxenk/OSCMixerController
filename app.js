@@ -2,6 +2,7 @@ const express = require('express');
 const { Client } = require('node-osc');
 const path = require('path');
 const { exec } = require('child_process');
+const fs = require('fs');
 
 const app = express();
 const port = 3000;
@@ -16,6 +17,32 @@ const oscClient = new Client(XR18_IP, XR18_PORT);
 // 정적 파일 제공
 app.use(express.static('public'));
 app.use(express.json());
+
+// 채널 설정 로드
+function loadChannelConfig() {
+    try {
+        const configPath = path.join(__dirname, 'config', 'channel_config.json');
+        const templatePath = path.join(__dirname, 'config', 'channel_config.template.json');
+        
+        // 설정 파일이 없으면 템플릿 파일을 복사
+        if (!fs.existsSync(configPath)) {
+            console.log('설정 파일이 없습니다. 템플릿 파일을 복사합니다.');
+            fs.copyFileSync(templatePath, configPath);
+        }
+        
+        const configData = fs.readFileSync(configPath, 'utf8');
+        return JSON.parse(configData);
+    } catch (error) {
+        console.error('채널 설정 로드 오류:', error);
+        return { channelGroups: [] };
+    }
+}
+
+// 채널 설정 API 엔드포인트
+app.get('/api/channel-config', (req, res) => {
+    const config = loadChannelConfig();
+    res.json(config);
+});
 
 // 메인 페이지
 app.get('/', (req, res) => {

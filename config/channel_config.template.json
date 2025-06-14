@@ -1,0 +1,34 @@
+{
+    "channelGroups": [
+        {
+            "name": "Ch 2+3+6",
+            "channels": [2, 3, 6],
+            "targetValues": [30, 50, 75]
+        },
+        {
+            "name": "Ch 4+5",
+            "channels": [4, 5],
+            "targetValues": [50, 75]
+        },
+        {
+            "name": "Ch 6+7",
+            "channels": [6, 7],
+            "targetValues": [50, 50]
+        },
+        {
+            "name": "Ch 8+9",
+            "channels": [8, 9],
+            "targetValues": [30, 50]
+        },
+        {
+            "name": "Ch 10+11",
+            "channels": [10, 11],
+            "targetValues": [50, 50]
+        },
+        {
+            "name": "Ch 12+13",
+            "channels": [12, 13],
+            "targetValues": [50, 50]
+        }
+    ]
+} 
