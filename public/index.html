@@ -173,6 +173,13 @@
             -webkit-appearance: slider-vertical;
             position: relative;
             z-index: 1;
+            /* 80% 지점에서 슬라이더가 멈추도록 설정 */
+            background: linear-gradient(to top, 
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0.3) 80%,
+                rgba(255, 255, 255, 0.1) 80%,
+                rgba(255, 255, 255, 0.1) 100%
+            );
         }
 
         /* Webkit (Chrome, Safari) 스타일 */
@@ -206,7 +213,12 @@
         /* Firefox 트랙 스타일 */
         .volume-slider::-moz-range-track {
             width: 8px;
-            background: rgba(255, 255, 255, 0.3);
+            background: linear-gradient(to top, 
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0.3) 80%,
+                rgba(255, 255, 255, 0.1) 80%,
+                rgba(255, 255, 255, 0.1) 100%
+            );
             border-radius: 5px;
         }
 
@@ -470,7 +482,12 @@
         
         // 볼륨 슬라이더 이벤트
         volumeSlider.addEventListener('input', async (e) => {
-            const value = parseFloat(e.target.value);
+            const rawValue = parseFloat(e.target.value);
+            const value = Math.min(rawValue, 0.8);
+            // 슬라이더 값을 80%로 제한
+            if (rawValue > 0.8) {
+                volumeSlider.value = 0.8;
+            }
             volumeValue.textContent = `${Math.round(value * 100)}%`;
             
             try {
