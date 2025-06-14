@@ -266,14 +266,14 @@
             }
             
             .mute-button {
-                width: 80px;
-                height: 80px;
-                font-size: 0.9em;
+                width: 100px;
+                height: 100px;
+                font-size: 0.8em;
             }
 
             .master-mute-button {
-                width: 50px;
-                height: 35px;
+                width: 100px;
+                height: 80px;
                 font-size: 0.8em;
             }
             
@@ -354,7 +354,7 @@
                                min="0" max="1" step="0.01" value="0.75">
                         <div class="volume-value" id="volumeValue">75%</div>
                     </div>
-                    <button id="muteButton" class="master-mute-button">🔊</button>
+                    <button id="muteButton" class="master-mute-button">Master Active</button>
                 </div>
             </div>
         </div>
@@ -467,7 +467,7 @@
                 
                 if (result.success) {
                     isMuted = !isMuted;
-                    muteButton.textContent = isMuted ? '🔇' : '🔊';
+                    muteButton.textContent = isMuted ? 'Master Muted' : 'Master Active';
                     muteButton.className = `master-mute-button ${isMuted ? 'muted' : ''}`;
                     status.textContent = `Master ${isMuted ? 'muted' : 'activated'}`;
                 } else {
