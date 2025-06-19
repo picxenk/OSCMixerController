@@ -3,26 +3,26 @@
         {
             "name": "Ch 1+2+3",
             "channels": [1, 2, 3],
-            "targetValues": [40, 50, 65]
+            "targetValues": [50, 50, 50]
         },
         {
-            "name": "Ch 4+5",
-            "channels": [4, 5],
-            "targetValues": [50, 65]
-        },
-        {
-            "name": "Ch 6+7",
-            "channels": [6, 7],
-            "targetValues": [50, 50]
+            "name": "Ch 4+5+6",
+            "channels": [4, 5, 6],
+            "targetValues": [50, 50, 50]
         },
         {
             "name": "Ch 1+2",
             "channels": [1, 2],
-            "targetValues": [40, 50]
+            "targetValues": [50, 50]
         },
         {
-            "name": "Ch 3+4",
-            "channels": [3, 4],
+            "name": "Ch 2+3",
+            "channels": [2, 3],
+            "targetValues": [50, 50]
+        },
+        {
+            "name": "Ch 4+5",
+            "channels": [4, 5],
             "targetValues": [50, 50]
         },
         {
